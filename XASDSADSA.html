@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Blackjack Bonito</title>
+<style>
+    body {
+        background: linear-gradient(135deg, #203a43, #203a43, #203a43);
+        color: white;
+        font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    .game {
+        margin-top: 20px;
+    }
+
+    .cards {
+        font-size: 24px;
+        margin: 10px;
+    }
+
+    .score {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        background: #00c9a7;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00a98f;
+    }
+
+    #result {
+        font-size: 22px;
+        margin-top: 15px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🃏 Blackjack 🃏</h1>
+
+<div class="game">
+    <h2>Jugador</h2>
+    <div id="player-cards" class="cards"></div>
+    <div id="player-score" class="score"></div>
+
+    <h2>Crupier</h2>
+    <div id="dealer-cards" class="cards"></div>
+    <div id="dealer-score" class="score"></div>
+
+    <div>
+        <button onclick="hit()">Pedir carta</button>
+        <button onclick="stand()">Plantarse</button>
+        <button onclick="startGame()">Reiniciar</button>
+    </div>
+
+    <div id="result"></div>
+</div>
+</div>
+
+<div class="info">
+    <h2>¿Cómo funciona el Blackjack?</h2>
+    <p>
+        El blackjack, también llamado veintiuno, es un juego de cartas,
+    </p>
+
+    <p>
+        propio de los casinos con una o más barajas inglesas de 52 cartas sin los comodines, 
+    </p>
+
+    <p>
+         que consiste en sumar un valor lo más próximo a 21 pero sin pasarse.
+    </p>
+
+    <p>
+        A diferencia de otros juegos de azar, combina la suerte con la toma de decisiones,
+    </p>
+
+    <p>
+        lo que permite a los jugadores expertos reducir la ventaja de la casa casi al mínimo.
+    </p>
+</div>
+<h3>Tabla de probabilidades</h3>
+<table style="width:100%; border-collapse: collapse; margin-top:10px;">
+    <tr style="background:#00c9a7; color:black;">
+        <th style="padding:8px;">Tu puntaje</th>
+        <th style="padding:8px;">Probabilidad de pasarte</th>
+    </tr>
+    <tr><td style="padding:8px;">11 o menos</td><td>0%</td></tr>
+    <tr><td style="padding:8px;">12</td><td>31%</td></tr>
+    <tr><td style="padding:8px;">13</td><td>39%</td></tr>
+    <tr><td style="padding:8px;">15</td><td>58%</td></tr>
+    <tr><td style="padding:8px;">18</td><td>77%</td></tr>
+    <tr><td style="padding:8px;">20</td><td>92%</td></tr>
+</table>
+
+<script>
+let deck = [];
+let player = [];
+let dealer = [];
+
+function createDeck() {
+    let suits = ["♠", "♥", "♦", "♣"];
+    let values = [
+        {name: "A", value: 11},
+        {name: "2", value: 2},
+        {name: "3", value: 3},
+        {name: "4", value: 4},
+        {name: "5", value: 5},
+        {name: "6", value: 6},
+        {name: "7", value: 7},
+        {name: "8", value: 8},
+        {name: "9", value: 9},
+        {name: "10", value: 10},
+        {name: "J", value: 10},
+        {name: "Q", value: 10},
+        {name: "K", value: 10}
+    ];
+
+    deck = [];
+
+    for (let suit of suits) {
+        for (let val of values) {
+            deck.push({
+                text: val.name + suit,
+                value: val.value
+            });
+        }
+    }
+
+    deck.sort(() => Math.random() - 0.5);
+}
+
+function getScore(hand) {
+    let score = 0;
+    let aces = 0;
+
+    for (let card of hand) {
+        score += card.value;
+        if (card.value === 11) aces++;
+    }
+
+    while (score > 21 && aces > 0) {
+        score -= 10;
+        aces--;
+    }
+
+    return score;
+}
+
+function drawCard(hand) {
+    hand.push(deck.pop());
+}
+
+function updateUI() {
+    document.getElementById("player-cards").innerText =
+        player.map(c => c.text).join(" ");
+
+    document.getElementById("dealer-cards").innerText =
+        dealer.map(c => c.text).join(" ");
+
+    document.getElementById("player-score").innerText =
+        "Puntaje: " + getScore(player);
+
+    document.getElementById("dealer-score").innerText =
+        "Puntaje: " + getScore(dealer);
+}
+
+function startGame() {
+    createDeck();
+    player = [];
+    dealer = [];
+    document.getElementById("result").innerText = "";
+
+    drawCard(player);
+    drawCard(player);
+    drawCard(dealer);
+
+    updateUI();
+}
+
+function hit() {
+    drawCard(player);
+    updateUI();
+
+    if (getScore(player) > 21) {
+        document.getElementById("result").innerText = "💀 Te pasaste. Perdiste.";
+    }
+}
+
+function stand() {
+    while (getScore(dealer) < 17) {
+        drawCard(dealer);
+    }
+
+    let playerScore = getScore(player);
+    let dealerScore = getScore(dealer);
+
+    let result = "";
+
+    if (dealerScore > 21 || playerScore > dealerScore) {
+        result = "🎉 Ganaste!";
+    } else if (playerScore < dealerScore) {
+        result = "😢 Perdiste.";
+    } else {
+        result = "🤝 Empate.";
+    }
+
+    document.getElementById("result").innerText = result;
+    updateUI();
+}
+
+startGame();
+</script>
+
+</body>
+</html>
