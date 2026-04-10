@@ -215,11 +215,11 @@ function stand() {
     let result = "";
 
     if (dealerScore > 21 || playerScore > dealerScore) {
-        result = "🎉 Ganaste!";
+        result = "Ganaste!";
     } else if (playerScore < dealerScore) {
-        result = "😢 Perdiste.";
+        result = "Perdiste.";
     } else {
-        result = "🤝 Empate.";
+        result = "Empate.";
     }
 
     document.getElementById("result").innerText = result;
